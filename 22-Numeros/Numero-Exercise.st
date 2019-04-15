@@ -529,7 +529,7 @@ Entero subclass: #Negative
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!Negative methodsFor: 'as yet unclassified' stamp: 'Lucas 4/14/2019 17:13:33'!
+!Negative methodsFor: 'arithmetic operations' stamp: 'Lucas 4/14/2019 17:13:33'!
 fibonacci
 
 	self error: Entero negativeFibonacciErrorDescription	
@@ -541,7 +541,7 @@ fibonacci
 Negative class
 	instanceVariableNames: ''!
 
-!Negative class methodsFor: 'as yet unclassified' stamp: 'Lucas 4/14/2019 17:17:55'!
+!Negative class methodsFor: 'instance creation' stamp: 'Lucas 4/14/2019 17:17:55'!
 isFor: aValue
 
 	^aValue isInteger and: [aValue < 0]! !
@@ -554,7 +554,7 @@ Entero subclass: #One
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!One methodsFor: 'as yet unclassified' stamp: 'Lucas 4/14/2019 17:14:47'!
+!One methodsFor: 'arithmetic operations' stamp: 'Lucas 4/14/2019 17:14:47'!
 fibonacci
 
 	| one |
@@ -569,7 +569,7 @@ fibonacci
 One class
 	instanceVariableNames: ''!
 
-!One class methodsFor: 'as yet unclassified' stamp: 'Lucas 4/14/2019 17:17:45'!
+!One class methodsFor: 'instance creation' stamp: 'Lucas 4/14/2019 17:17:45'!
 isFor: aValue
 
 	^aValue isInteger and: [aValue = 1]! !
@@ -582,7 +582,7 @@ Entero subclass: #PostiveLargerThanOne
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!PostiveLargerThanOne methodsFor: 'as yet unclassified' stamp: 'Lucas 4/14/2019 17:15:15'!
+!PostiveLargerThanOne methodsFor: 'arithmetic operations' stamp: 'Lucas 4/14/2019 17:15:15'!
 fibonacci
 
 	| one two |
@@ -599,7 +599,7 @@ fibonacci
 PostiveLargerThanOne class
 	instanceVariableNames: ''!
 
-!PostiveLargerThanOne class methodsFor: 'as yet unclassified' stamp: 'Lucas 4/14/2019 17:18:04'!
+!PostiveLargerThanOne class methodsFor: 'instance creation' stamp: 'Lucas 4/14/2019 17:18:04'!
 isFor: aValue
 
 	^aValue isInteger and: [aValue > 1]! !
@@ -612,7 +612,7 @@ Entero subclass: #Zero
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!Zero methodsFor: 'as yet unclassified' stamp: 'Lucas 4/14/2019 17:14:23'!
+!Zero methodsFor: 'arithmetic operations' stamp: 'Lucas 4/14/2019 17:14:23'!
 fibonacci
 
 	| one |
@@ -629,7 +629,7 @@ fibonacci
 Zero class
 	instanceVariableNames: ''!
 
-!Zero class methodsFor: 'as yet unclassified' stamp: 'Lucas 4/14/2019 17:17:22'!
+!Zero class methodsFor: 'instance creation' stamp: 'Lucas 4/14/2019 17:17:22'!
 isFor: aValue
 
 	^aValue isInteger and: [aValue = 0]! !
@@ -824,6 +824,34 @@ with: aDividend over: aDivisor
 	! !
 
 
+!classDefinition: #Aparent category: #'Numero-Exercise'!
+Fraccion subclass: #Aparent
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!Aparent methodsFor: 'initialization' stamp: 'Lucas 4/15/2019 15:49:49'!
+initializeWith: aDividend and: aDivisor
+
+	| greatestCommonDivisor |
+	
+	greatestCommonDivisor := aDividend greatestCommonDivisorWith: aDivisor.
+	
+	^aDividend // greatestCommonDivisor.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Aparent class' category: #'Numero-Exercise'!
+Aparent class
+	instanceVariableNames: ''!
+
+!Aparent class methodsFor: 'intance creation' stamp: 'Lucas 4/15/2019 16:05:58'!
+isFor: aDividend and: aDivisor
+
+	^((aDivisor isNegative not) and: [aDivisor isZero not]) and: [(aDividend greatestCommonDivisorWith: aDivisor) = aDivisor]! !
+
+
 !classDefinition: #NegativeDivisor category: #'Numero-Exercise'!
 Fraccion subclass: #NegativeDivisor
 	instanceVariableNames: ''
@@ -831,7 +859,7 @@ Fraccion subclass: #NegativeDivisor
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!NegativeDivisor methodsFor: 'as yet unclassified' stamp: 'Lucas 4/15/2019 14:26:52'!
+!NegativeDivisor methodsFor: 'initialization' stamp: 'Lucas 4/15/2019 14:26:52'!
 initializeWith: aDividend and: aDivisor
 
 	^aDividend negated / aDivisor negated! !
@@ -842,7 +870,7 @@ initializeWith: aDividend and: aDivisor
 NegativeDivisor class
 	instanceVariableNames: ''!
 
-!NegativeDivisor class methodsFor: 'as yet unclassified' stamp: 'Lucas 4/15/2019 14:31:41'!
+!NegativeDivisor class methodsFor: 'instance creation' stamp: 'Lucas 4/15/2019 14:31:41'!
 isFor: aDividend and: aDivisor
 
 	^aDivisor isNegative! !
@@ -855,7 +883,7 @@ Fraccion subclass: #PositiveDivisorNonZeroDividend
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!PositiveDivisorNonZeroDividend methodsFor: 'as yet unclassified' stamp: 'Lucas 4/15/2019 14:28:16'!
+!PositiveDivisorNonZeroDividend methodsFor: 'initialization' stamp: 'Lucas 4/15/2019 15:50:24'!
 initializeWith: aDividend and: aDivisor
 
 	| greatestCommonDivisor |
@@ -863,10 +891,14 @@ initializeWith: aDividend and: aDivisor
 	numerator := aDividend // greatestCommonDivisor.
 	denominator := aDivisor // greatestCommonDivisor.
 	
+	^self. 
+	
+	"
 	denominator isOne ifTrue: [ ^numerator ].
 	
 	numerator := numerator.
-	denominator := denominator ! !
+	denominator := denominator 
+	"! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -874,10 +906,10 @@ initializeWith: aDividend and: aDivisor
 PositiveDivisorNonZeroDividend class
 	instanceVariableNames: ''!
 
-!PositiveDivisorNonZeroDividend class methodsFor: 'as yet unclassified' stamp: 'Lucas 4/15/2019 14:32:57'!
+!PositiveDivisorNonZeroDividend class methodsFor: 'instance creation' stamp: 'Lucas 4/15/2019 15:49:01'!
 isFor: aDividend and: aDivisor
 
-	^(aDivisor isNegative not) and: [aDivisor isZero not]! !
+	^((aDivisor isNegative not) and: [aDivisor isZero not]) and: [((aDividend greatestCommonDivisorWith: aDivisor) = aDivisor ) not]! !
 
 
 !classDefinition: #ZeroDividend category: #'Numero-Exercise'!
@@ -887,10 +919,10 @@ Fraccion subclass: #ZeroDividend
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!ZeroDividend methodsFor: 'as yet unclassified' stamp: 'Lucas 4/15/2019 14:26:23'!
+!ZeroDividend methodsFor: 'initialization' stamp: 'Lucas 4/15/2019 15:43:58'!
 initializeWith: aDividend and: aDivisor
 
-	^aDividend
+	^Entero with: aDividend
 	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
@@ -899,10 +931,10 @@ initializeWith: aDividend and: aDivisor
 ZeroDividend class
 	instanceVariableNames: ''!
 
-!ZeroDividend class methodsFor: 'as yet unclassified' stamp: 'Lucas 4/15/2019 14:31:17'!
+!ZeroDividend class methodsFor: 'instance creation' stamp: 'Lucas 4/15/2019 16:06:20'!
 isFor: aDividend and: aDivisor
 
-	^aDividend isZero and: [aDivisor isZero not].! !
+	^aDividend = 0 and: [aDivisor isZero not].! !
 
 
 !classDefinition: #ZeroDivisor category: #'Numero-Exercise'!
@@ -912,7 +944,7 @@ Fraccion subclass: #ZeroDivisor
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!ZeroDivisor methodsFor: 'as yet unclassified' stamp: 'Lucas 4/15/2019 14:38:46'!
+!ZeroDivisor methodsFor: 'initialization' stamp: 'Lucas 4/15/2019 14:38:46'!
 initializeWith: aDividend and: aDivisor
 
 	^self error: self class canNotDivideByZeroErrorDescription! !
@@ -923,7 +955,7 @@ initializeWith: aDividend and: aDivisor
 ZeroDivisor class
 	instanceVariableNames: ''!
 
-!ZeroDivisor class methodsFor: 'as yet unclassified' stamp: 'Lucas 4/15/2019 14:30:51'!
+!ZeroDivisor class methodsFor: 'instance creation' stamp: 'Lucas 4/15/2019 14:30:51'!
 isFor: aDividend and: aDivisor
 
 	^aDivisor isZero.! !
