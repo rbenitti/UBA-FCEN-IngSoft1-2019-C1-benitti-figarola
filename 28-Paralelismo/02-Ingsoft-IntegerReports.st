@@ -127,10 +127,10 @@ value
 	self subclassResponsibility ! !
 
 
-!IntegerReport methodsFor: 'time consuption simulation' stamp: 'rb 5/17/2019 08:07:06'!
+!IntegerReport methodsFor: 'time consuption simulation' stamp: 'rb 5/17/2019 08:18:27'!
 wait
 
-	"(Delay forSeconds: 1) wait."
+	(Delay forSeconds: 1) wait.
 ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
@@ -152,20 +152,25 @@ IntegerReport subclass: #CombinedIntegerPropertiesReport
 	poolDictionaries: ''
 	category: 'Ingsoft-IntegerReports'!
 
-!CombinedIntegerPropertiesReport methodsFor: 'reporting' stamp: 'rb 5/17/2019 07:54:43'!
+!CombinedIntegerPropertiesReport methodsFor: 'reporting' stamp: 'rb 5/18/2019 16:20:55'!
 value
 
-	| basicPropertiesLines complexPropertiesLines lines |
+	| basicPropertiesLines complexPropertiesLines lines sincronizador |
 	
+	sincronizador := Sincronizador new.
 	lines := OrderedCollection new.
-	basicPropertiesLines := (BasicIntegerPropertiesReport for: integerToAnalize) value.
-	complexPropertiesLines := (ComplexIntegerPropertiesReport for: integerToAnalize) value.
+	
+	sincronizador addParallelTask: [basicPropertiesLines := (BasicIntegerPropertiesReport for: integerToAnalize) value ] .
+	sincronizador addParallelTask: [complexPropertiesLines := (ComplexIntegerPropertiesReport for: integerToAnalize) value ] .
 
+	^sincronizador runAndAfterWaintingDo: [	
 	lines 
 		addAll: basicPropertiesLines;
 		addAll: complexPropertiesLines.
 		
-	^lines! !
+	^lines.]
+	
+	! !
 
 
 !classDefinition: #CompleteIntegerReport category: #'Ingsoft-IntegerReports'!
@@ -175,20 +180,21 @@ IntegerReport subclass: #CompleteIntegerReport
 	poolDictionaries: ''
 	category: 'Ingsoft-IntegerReports'!
 
-!CompleteIntegerReport methodsFor: 'reporting' stamp: 'rb 5/17/2019 07:55:02'!
+!CompleteIntegerReport methodsFor: 'reporting' stamp: 'rb 5/18/2019 16:21:33'!
 value
 
-	| combinedPropertiesLines differentBasesLines lines |
+	| combinedPropertiesLines differentBasesLines lines sincronizador |
 	
+	sincronizador := Sincronizador new.
 	lines := OrderedCollection new.	
-	combinedPropertiesLines := (CombinedIntegerPropertiesReport for: integerToAnalize) value.
-	differentBasesLines := (IntegerOnDifferentBasesReport for: integerToAnalize) value.
-		
+	sincronizador addParallelTask: [combinedPropertiesLines := (CombinedIntegerPropertiesReport for: integerToAnalize) value ] .
+	sincronizador addParallelTask: [differentBasesLines := (IntegerOnDifferentBasesReport for: integerToAnalize) value ] .
+	^sincronizador runAndAfterWaintingDo: [
 	lines
 		addAll: combinedPropertiesLines;
 		addAll: differentBasesLines.
 		
-	^lines! !
+	^lines].! !
 
 
 !classDefinition: #IntegerOnDifferentBasesReport category: #'Ingsoft-IntegerReports'!
@@ -206,7 +212,7 @@ addNumberInBase: aBase to: lines title: aTitle
 	! !
 
 
-!IntegerOnDifferentBasesReport methodsFor: 'reporting' stamp: 'rb 5/17/2019 07:55:42'!
+!IntegerOnDifferentBasesReport methodsFor: 'reporting' stamp: 'rb 5/17/2019 09:08:04'!
 value
 
 	| lines |
@@ -244,7 +250,7 @@ IntegerPropertiesReport subclass: #BasicIntegerPropertiesReport
 	poolDictionaries: ''
 	category: 'Ingsoft-IntegerReports'!
 
-!BasicIntegerPropertiesReport methodsFor: 'reporting' stamp: 'rb 5/17/2019 07:56:15'!
+!BasicIntegerPropertiesReport methodsFor: 'reporting' stamp: 'rb 5/17/2019 09:08:13'!
 value
 
 	| lines |
@@ -266,7 +272,7 @@ IntegerPropertiesReport subclass: #ComplexIntegerPropertiesReport
 	poolDictionaries: ''
 	category: 'Ingsoft-IntegerReports'!
 
-!ComplexIntegerPropertiesReport methodsFor: 'reporting' stamp: 'rb 5/17/2019 07:56:36'!
+!ComplexIntegerPropertiesReport methodsFor: 'reporting' stamp: 'rb 5/17/2019 09:08:20'!
 value
 
 	| lines |
@@ -279,3 +285,31 @@ value
 		addLineTo: lines title: 'Sqrt' with: [ integerToAnalize sqrt ].
 		
 	^lines! !
+
+
+!classDefinition: #Sincronizador category: #'Ingsoft-IntegerReports'!
+Object subclass: #Sincronizador
+	instanceVariableNames: 'tasks semaforo'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Ingsoft-IntegerReports'!
+
+!Sincronizador methodsFor: 'actions' stamp: 'rb 5/18/2019 16:20:32'!
+addParallelTask: aBlock
+	tasks add: [aBlock value. semaforo signal].! !
+
+!Sincronizador methodsFor: 'actions' stamp: 'rb 5/18/2019 16:18:12'!
+runAndAfterWaintingDo: aBlock
+	
+	tasks do: [ :t | t fork].
+	
+	semaforo wait.
+	^aBlock value.
+	! !
+
+
+!Sincronizador methodsFor: 'initialization' stamp: 'rb 5/18/2019 16:14:47'!
+initialize
+	semaforo := Semaphore new.
+	tasks  := OrderedCollection  new.
+	Transcript show: 'Se inicializo el sincronizador'.! !
