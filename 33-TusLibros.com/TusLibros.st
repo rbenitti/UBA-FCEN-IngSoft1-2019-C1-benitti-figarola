@@ -130,7 +130,7 @@ setUp
 
 	today := GregorianMonthOfYear current.! !
 
-!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 08:49:31'!
+!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 20:07:59'!
 test01CashierCanNotCheckOutAnEmptyCart
 
 	| cart cashier card |
@@ -143,11 +143,13 @@ test01CashierCanNotCheckOutAnEmptyCart
 		should: [cashier checkOutWith: card. ]
 		raise: Error
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = cashier class canNotCheckOutOfCartEmptyErrorMessage. ]
+			self assert: anError messageText = cashier class canNotCheckOutOfCartEmptyErrorMessage.
+			self assert: cashier totalSold equals: 0.
+			self assert: cashier soldItemsCount equals: 0.]
 	
 	! !
 
-!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 08:51:12'!
+!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 20:08:20'!
 test02CheckOutOfACartWithOneItemReturnTicketWithCorrectPrice
 
 	| cart cashier card price |
@@ -159,10 +161,12 @@ test02CheckOutOfACartWithOneItemReturnTicketWithCorrectPrice
 	
 	price := cashier checkOutWith: card.
 	self assert: price equals: 5.
+	self assert: cashier totalSold equals: 5.
+	self assert: cashier soldItemsCount equals: 1.
 	
 	! !
 
-!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 08:51:18'!
+!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 20:08:40'!
 test03CheckOutOfACartWithMoreThanOneItemReturnTicketWithCorrectPrice
 
 	| cart cashier card price |
@@ -175,10 +179,12 @@ test03CheckOutOfACartWithMoreThanOneItemReturnTicketWithCorrectPrice
 	
 	price := cashier checkOutWith: card.
 	self assert: price equals: 10.
+	self assert: cashier totalSold equals: 10.
+	self assert: cashier soldItemsCount equals: 2.
 	
 	! !
 
-!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 08:51:24'!
+!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 20:08:52'!
 test04CheckOutOfACartWithDifferentItemsReturnTicketWithCorrectPrice
 
 	| cart cashier card price |
@@ -192,10 +198,12 @@ test04CheckOutOfACartWithDifferentItemsReturnTicketWithCorrectPrice
 	
 	price := cashier checkOutWith: card.
 	self assert: price equals: 40.
+	self assert: cashier totalSold equals: 40.
+		self assert: cashier soldItemsCount equals: 5.
 	
 	! !
 
-!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 08:55:24'!
+!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 20:09:03'!
 test05CanNotCheckOutACartWithAnExpiredCreditCard
 
 	| cart cashier card |
@@ -211,11 +219,13 @@ test05CanNotCheckOutACartWithAnExpiredCreditCard
 		should: [cashier checkOutWith: card.]
 		raise: Error
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = Cashier expiredCreditCardErrorDescription. ]
+			self assert: anError messageText = Cashier expiredCreditCardErrorDescription. 
+			self assert: cashier totalSold equals: 0.
+			self assert: cashier soldItemsCount equals: 0.]
 	
 	! !
 
-!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 08:51:39'!
+!CashierTest methodsFor: 'testing' stamp: 'Lucas 6/9/2019 20:09:19'!
 test06CanNotCheckOutACartWithAnExceededNameLengthOfCreditCardOwner
 
 	| cart cashier card |
@@ -231,7 +241,9 @@ test06CanNotCheckOutACartWithAnExceededNameLengthOfCreditCardOwner
 		should: [cashier checkOutWith: card.]
 		raise: Error
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = Cashier exceededNameLengthOfCreditCardOwnerErrorDescription. ]
+			self assert: anError messageText = Cashier exceededNameLengthOfCreditCardOwnerErrorDescription.
+			self assert: cashier totalSold equals: 0.
+			self assert: cashier soldItemsCount equals: 0. ]
 	
 	! !
 
@@ -346,6 +358,14 @@ add: aQuantity of: anItem
 	1 to: aQuantity do: [ :aNumber | items add: anItem ]! !
 
 
+!Cart methodsFor: 'operations' stamp: 'Lucas 6/9/2019 19:50:50'!
+addedItems
+	
+	| addedItems |
+	addedItems := Bag new.
+	addedItems addAll: items.
+	^addedItems! !
+
 !Cart methodsFor: 'operations' stamp: 'Lucas 6/9/2019 08:23:55'!
 total 
 
@@ -368,35 +388,51 @@ acceptingItemsOf: aCatalog
 
 !classDefinition: #Cashier category: #TusLibros!
 Object subclass: #Cashier
-	instanceVariableNames: 'cart today'
+	instanceVariableNames: 'cart today salesBook totalSold'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cashier methodsFor: 'operations' stamp: 'Lucas 6/9/2019 08:57:31'!
+!Cashier methodsFor: 'operations' stamp: 'Lucas 6/9/2019 20:13:57'!
 checkOutWith: aCard
 
-	| ticket merchantProcessor|
+	| total merchantProcessor|
 	
 	merchantProcessor := MerchantProcessor new.
 	
 	(cart isEmpty) ifTrue: [^self error: self class canNotCheckOutOfCartEmptyErrorMessage].
 	(aCard owner size) > 30 ifTrue: [^self error: self class exceededNameLengthOfCreditCardOwnerErrorDescription].
-	(aCard expiryDate < today) ifTrue: [self error: self class expiredCreditCardErrorDescription].
-	ticket := cart total.
+	(aCard isExpiredWith: today) ifTrue: [^self error: self class expiredCreditCardErrorDescription].
+	total := cart total.
 	
-	 merchantProcessor charge: ticket to: aCard.
+	 merchantProcessor charge: total to: aCard.
 	
-	^ticket
+	salesBook addAll: cart addedItems.
+	totalSold := total.
+	
+	^total
 	
 	! !
 
 
-!Cashier methodsFor: 'initialization' stamp: 'Lucas 6/9/2019 08:50:39'!
+!Cashier methodsFor: 'initialization' stamp: 'Lucas 6/9/2019 19:53:19'!
 initializeWith: aCart and: aDate
 
 	cart := aCart.
-	today := aDate.! !
+	today := aDate.
+	salesBook := OrderedCollection new.
+	totalSold := 0.! !
+
+
+!Cashier methodsFor: 'testing' stamp: 'Lucas 6/9/2019 20:07:33'!
+soldItemsCount
+
+	^salesBook size.! !
+
+!Cashier methodsFor: 'testing' stamp: 'Lucas 6/9/2019 20:07:29'!
+totalSold
+
+	^totalSold ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -433,16 +469,16 @@ Object subclass: #CreditCard
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CreditCard methodsFor: 'as yet unclassified' stamp: 'rb 6/8/2019 10:00:14'!
-expiryDate
-	^expiryDate .! !
-
 !CreditCard methodsFor: 'as yet unclassified' stamp: 'rb 6/8/2019 09:59:24'!
 initializeWithaNumber: aCreditCardNumber andExpiryDateOf: anExpiryDate andOwnerName: aName
 	number := aCreditCardNumber.
 	expiryDate := anExpiryDate.
 	owner := aName.
 	! !
+
+!CreditCard methodsFor: 'as yet unclassified' stamp: 'Lucas 6/9/2019 20:13:42'!
+isExpiredWith: today
+	^today > expiryDate  .! !
 
 !CreditCard methodsFor: 'as yet unclassified' stamp: 'rb 6/8/2019 10:00:01'!
 number
